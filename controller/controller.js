@@ -71,7 +71,7 @@ async function ContactsData(req, res) {
       payload.lastMsg = isExist ? isExist.lastMessage : "No messages yet";
       payload.time = isExist ? isExist.updatedAt : null;
       payload.senderName = isExist?.senderName;
-
+      payload.timestamp = isExist?.timestamp;
       arr.push(payload);
     }
 
@@ -138,12 +138,17 @@ async function getMsgHandle(req, res) {
     const { receiverId } = req.body;
     const userdetail = getData(req, res);
     const senderId = userdetail.id;
+    console.log("come")
+    console.log(senderId, receiverId,"wdfghnm");
     const chatId = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
     });
-    const Messages = await Message.find({ chatId: chatId?.id });
     let obj = [];
-    Messages.forEach((msgs) => {
+        console.log(chatId);
+    if (chatId == null) return res.status(404).json({ msg: "not found", obj });
+    const Messages = await Message.find({ chatId: chatId?.id });
+    if(Messages.length==0) return res.status(404).json({ msg: "not found", obj });
+    Messages?.forEach((msgs) => {
       const payloadSend = {
         msg: msgs.msg,
         senderId: msgs.senderId,
