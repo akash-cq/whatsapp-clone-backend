@@ -8,6 +8,7 @@ const router = require("./routes/routes");
 app.use(cookieParser()); // Enables cookie parsing
 app.use(express.json());
 let users = {};
+
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
@@ -17,6 +18,7 @@ app.use(
     credentials: true,
   })
 );
+app.use("/uploads", express.static("uploads")); 
 app.use("/", router);
 const server = app.listen(3000, () => {
   console.log("server listen on port 3000");

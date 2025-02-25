@@ -138,16 +138,17 @@ async function getMsgHandle(req, res) {
     const { receiverId } = req.body;
     const userdetail = getData(req, res);
     const senderId = userdetail.id;
-    console.log("come")
-    console.log(senderId, receiverId,"wdfghnm");
+    console.log("come");
+    console.log(senderId, receiverId, "wdfghnm");
     const chatId = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
     });
     let obj = [];
-        console.log(chatId);
+    console.log(chatId);
     if (chatId == null) return res.status(404).json({ msg: "not found", obj });
     const Messages = await Message.find({ chatId: chatId?.id });
-    if(Messages.length==0) return res.status(404).json({ msg: "not found", obj });
+    if (Messages.length == 0)
+      return res.status(404).json({ msg: "not found", obj });
     Messages?.forEach((msgs) => {
       const payloadSend = {
         msg: msgs.msg,
@@ -175,6 +176,22 @@ async function getInformation(req, res) {
     return res.status(500).json({ msg: "internal error" });
   }
 }
+async function uploadProfileDp(req, res) {
+  try {
+    const user = getData(req, res);
+    const userDetail = await User.findById(user.id);
+    const cleanPath = req.file.path.replace(/\\/g, "/").replace(/\/{2,}/g, "/");
+    const fileUrl = `${req.protocol}://${req.get("host")}/${cleanPath}`;
+    userDetail.dp = fileUrl;
+    await userDetail.save();
+    return res
+      .status(200)
+      .json({ msg: "profile pic uploaded successfully", dp: fileUrl });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: "internal error" });
+  }
+}
 module.exports = {
   Registartion,
   UserLoginhandle,
@@ -183,4 +200,5 @@ module.exports = {
   MsgHandle,
   getMsgHandle,
   getInformation,
+  uploadProfileDp,
 };
