@@ -11,5 +11,8 @@ router.get("/user/info/:id", authentication, controller.getInformation);
 router.get("/authentication", verify);
 router.post("/sendMsg",authentication,controller.MsgHandle)
 router.post("/getMsg", authentication, controller.getMsgHandle);
-router.post("/upload/profileDp",upload.single('file'), controller.uploadProfileDp);
+router.post("/upload/profileDp",upload.single('dp'), controller.uploadProfileDp);
+router.post("/upload/msgFile",upload.single('msgFile'), controller.uploadMsgFile);
+// router.get("/download/:file", controller.downloadFile);
+router.get("/logout", controller.logout);
 module.exports = router

@@ -121,13 +121,21 @@ async function MsgHandle(req, res) {
       chatId: IsExist._id,
       senderId: senderId,
       receiverId: receiverId,
-      msg: msg,
+      msg: msg==null?"no message yet":msg,
       isRead: isRead || false,
       senderName: username.userName,
       timestamp: timestamp,
+      
     };
-    const msgModel = Message.create(payloadForMsg);
-    return res.status(200).json({ msg: "succesfuly saved" });
+    console.log(req.body)
+    if(req.body.fileUrl){
+      console.log("wsdcfvb ")
+      payloadForMsg.fileUrl = req.body.fileUrl;
+    }
+    const msgModel =await Message.create(payloadForMsg);
+    await msgModel.save();
+    // console.log(msgModel);
+    return res.status(200).json({ msg: "succesfuly saved" ,msgModel});
   } catch (err) {
     console.log(err);
     res.status(500).json({ err, msg: "internal error" });
@@ -157,6 +165,8 @@ async function getMsgHandle(req, res) {
         sender: msgs.sender,
         senderName: msgs.senderName,
         timestamp: msgs.timestamp,
+        msgId:msgs._id,
+        fileUrl:msgs.fileUrl
       };
       obj.push(payloadSend);
     });
@@ -179,6 +189,7 @@ async function getInformation(req, res) {
 async function uploadProfileDp(req, res) {
   try {
     const user = getData(req, res);
+    console.log(req.file);
     const userDetail = await User.findById(user.id);
     const cleanPath = req.file.path.replace(/\\/g, "/").replace(/\/{2,}/g, "/");
     const fileUrl = `${req.protocol}://${req.get("host")}/${cleanPath}`;
@@ -192,6 +203,29 @@ async function uploadProfileDp(req, res) {
     return res.status(500).json({ msg: "internal error" });
   }
 }
+async function uploadMsgFile(req,res) {
+  try{
+
+    const cleanPath = req.file.path.replace(/\\/g, "/").replace(/\/{2,}/g, "/");
+    const fileUrl = `${req.protocol}://${req.get("host")}/${cleanPath}`;
+    return res.status(200).json({ msg: "file uploaded successfully", fileUrl });
+
+  }catch(err){
+    console.log(err);
+    return res.status(500).json({ msg: "internal error" });
+  }
+}
+async function logout(req,res) {
+  try{
+
+      res.clearCookie("token");
+    return res.status(200).json({msg:"logout successfully"});
+
+  }catch(err){
+    console.log(err);
+    return res.status(500).json({ msg: "internal error" });
+  }
+}
 module.exports = {
   Registartion,
   UserLoginhandle,
@@ -201,4 +235,6 @@ module.exports = {
   getMsgHandle,
   getInformation,
   uploadProfileDp,
+  logout,
+  uploadMsgFile,
 };
