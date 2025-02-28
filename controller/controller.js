@@ -188,6 +188,10 @@ async function getInformation(req, res) {
 }
 async function uploadProfileDp(req, res) {
   try {
+    if(req.file==null){
+      console.log("error in file");
+      return res.status(400).json({msg:"file not found"});
+    }
     const user = getData(req, res);
     console.log(req.file);
     const userDetail = await User.findById(user.id);
@@ -205,6 +209,11 @@ async function uploadProfileDp(req, res) {
 }
 async function uploadMsgFile(req,res) {
   try{
+    console.log(req.file);
+    if(req.file==null){
+      console.log("error in file");
+      return res.status(400).json({msg:"file not found"});
+    }
 
     const cleanPath = req.file.path.replace(/\\/g, "/").replace(/\/{2,}/g, "/");
     const fileUrl = `${req.protocol}://${req.get("host")}/${cleanPath}`;
@@ -215,7 +224,7 @@ async function uploadMsgFile(req,res) {
     return res.status(500).json({ msg: "internal error" });
   }
 }
-async function logout(req,res) {
+async function logout(req,res){
   try{
 
       res.clearCookie("token");

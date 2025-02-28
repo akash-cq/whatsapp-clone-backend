@@ -3,6 +3,10 @@ const router = express.Router();
 const {authentication, verify} = require("../middleware/auth")
 const controller = require("../controller/controller")
 const upload = require("../middleware/multer");
+router.get("/", (req, res) => {
+    console.log(req.socket.remoteAddress)
+    res.send("Hello World");
+});
 router.post("/signup",controller.Registartion)
 router.post("/login",controller.UserLoginhandle)
 router.get("/getContacts",authentication, controller.ContactsData)
