@@ -1,41 +1,57 @@
 const User = require("../model/user");
 const Chat = require("../model/chat");
 const Message = require("../model/message");
-const { setAssign, getData } = require("../middleware/auth");
+const bcrypt = require("bcrypt");
+const { setAssign } = require("../middleware/auth");
 async function Registartion(req, res) {
   const { name, email, password } = req.body;
-  try {
-    const payload = {
-      userName: name,
-      email: email,
-      password: password,
-    };
-    const isemailExist = await User.findOne({ email: payload.email });
-    if (isemailExist != null)
-      return res.status(401).json({ msg: "user already exist" });
-
-    const user = new User({
-      userName: payload.userName,
-      email: payload.email,
-      password: payload.password,
-    });
-    await user.save();
-    return res.status(200).json({ msg: "successfuly registred" });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ msg: "internal error", err });
+  if (name.trim() == "" || email.trim() == "" || password.trim() == ""||password.length<=6){
+    return res.status(401).json({msg:"something is wrong in credential please check"})
   }
+    try {
+      const payload = {
+        userName: name.replace(/\s/g, ""),
+        email: email.replace(/\s/g, ""),
+        password: password.replace(/\s/g, ""),
+      };
+      console.log(payload)
+      const isemailExist = await User.findOne({ email: payload.email });
+      if (isemailExist != null)
+        return res.status(401).json({ msg: "user already exist" });
+      const salt = await bcrypt.genSalt(10);
+      const hashP = await bcrypt.hash(payload.password, salt);
+
+      const user = new User({
+        userName: payload.userName,
+        email: payload.email,
+        password: hashP,
+      });
+      await user.save();
+      return res.status(200).json({ msg: "successfuly registred" });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: "internal error", err });
+    }
 }
 async function UserLoginhandle(req, res) {
+  if(req.body.email.trim()==""||req.body.password.trim()=="")return res.status(400).json({ msg: "credentilas filed is empty!!!" });
   const payload = {
     email: req.body.email,
     password: req.body.password,
   };
+  console.log(payload);
   try {
     const userdetail = await User.findOne({ email: payload.email });
-    if (userdetail == null || userdetail?.password != payload.password) {
+    console.log(userdetail);
+    if (userdetail == null) {
       return res.status(400).json({ msg: "user credentail wrong" });
     }
+    const result = await bcrypt.compare(payload.password, userdetail.password);
+
+      if (!result) {
+        return res.status(400).json({ error: "Invalid credentials" });
+      }
+
     const obj = {
       email: payload.email,
       id: userdetail._id,
@@ -55,9 +71,10 @@ async function exist(senderId, receiverId) {
 
 async function ContactsData(req, res) {
   try {
-    const userdetail = await getData(req, res); // Await if getData is async
+    const userdetail = req.obj;
 
     const users = await User.find({ _id: { $ne: userdetail.id } });
+
     let arr = [];
 
     for (const obj of users) {
@@ -84,7 +101,7 @@ async function ContactsData(req, res) {
 
 async function PersonalDetail(req, res) {
   try {
-    const userdetails = getData(req, res);
+    const userdetails = req.obj;
     const user = await User.findById(userdetails.id);
     if (user == null) return res.status(404).json({ msg: "not found" });
     return res.status(200).json({ msg: "success ", user });
@@ -121,21 +138,20 @@ async function MsgHandle(req, res) {
       chatId: IsExist._id,
       senderId: senderId,
       receiverId: receiverId,
-      msg: msg==null?"no message yet":msg,
+      msg: msg == null ? "no message yet" : msg,
       isRead: isRead || false,
       senderName: username.userName,
       timestamp: timestamp,
-      
     };
-    console.log(req.body)
-    if(req.body.fileUrl){
-      console.log("wsdcfvb ")
+    console.log(req.body);
+    if (req.body.fileUrl) {
+      console.log("wsdcfvb ");
       payloadForMsg.fileUrl = req.body.fileUrl;
     }
-    const msgModel =await Message.create(payloadForMsg);
+    const msgModel = await Message.create(payloadForMsg);
     await msgModel.save();
     // console.log(msgModel);
-    return res.status(200).json({ msg: "succesfuly saved" ,msgModel});
+    return res.status(200).json({ msg: "succesfuly saved", msgModel });
   } catch (err) {
     console.log(err);
     res.status(500).json({ err, msg: "internal error" });
@@ -144,7 +160,7 @@ async function MsgHandle(req, res) {
 async function getMsgHandle(req, res) {
   try {
     const { receiverId } = req.body;
-    const userdetail = getData(req, res);
+    const userdetail = req.obj;
     const senderId = userdetail.id;
     console.log("come");
     console.log(senderId, receiverId, "wdfghnm");
@@ -165,8 +181,8 @@ async function getMsgHandle(req, res) {
         sender: msgs.sender,
         senderName: msgs.senderName,
         timestamp: msgs.timestamp,
-        msgId:msgs._id,
-        fileUrl:msgs.fileUrl
+        msgId: msgs._id,
+        fileUrl: msgs.fileUrl,
       };
       obj.push(payloadSend);
     });
@@ -188,11 +204,11 @@ async function getInformation(req, res) {
 }
 async function uploadProfileDp(req, res) {
   try {
-    if(req.file==null){
+    if (req.file == null) {
       console.log("error in file");
-      return res.status(400).json({msg:"file not found"});
+      return res.status(400).json({ msg: "file not found" });
     }
-    const user = getData(req, res);
+    const user = req.obj;
     console.log(req.file);
     const userDetail = await User.findById(user.id);
     const cleanPath = req.file.path.replace(/\\/g, "/").replace(/\/{2,}/g, "/");
@@ -207,30 +223,27 @@ async function uploadProfileDp(req, res) {
     return res.status(500).json({ msg: "internal error" });
   }
 }
-async function uploadMsgFile(req,res) {
-  try{
+async function uploadMsgFile(req, res) {
+  try {
     console.log(req.file);
-    if(req.file==null){
+    if (req.file == null) {
       console.log("error in file");
-      return res.status(400).json({msg:"file not found"});
+      return res.status(400).json({ msg: "file not found" });
     }
 
     const cleanPath = req.file.path.replace(/\\/g, "/").replace(/\/{2,}/g, "/");
     const fileUrl = `${req.protocol}://${req.get("host")}/${cleanPath}`;
     return res.status(200).json({ msg: "file uploaded successfully", fileUrl });
-
-  }catch(err){
+  } catch (err) {
     console.log(err);
     return res.status(500).json({ msg: "internal error" });
   }
 }
-async function logout(req,res){
-  try{
-
-      res.clearCookie("token");
-    return res.status(200).json({msg:"logout successfully"});
-
-  }catch(err){
+async function logout(req, res) {
+  try {
+    res.clearCookie("token");
+    return res.status(200).json({ msg: "logout successfully" });
+  } catch (err) {
     console.log(err);
     return res.status(500).json({ msg: "internal error" });
   }

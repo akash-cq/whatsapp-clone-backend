@@ -5,8 +5,12 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const socket = require("socket.io");
 const router = require("./routes/routes");
+require("dotenv").config();
+
 app.use(cookieParser()); // Enables cookie parsing
 app.use(express.json());
+// const static = require("./middleware/static");
+// app.use("/uploads", static("uploads")); 
 let users = {};
 
 app.use(express.urlencoded({ extended: true }));

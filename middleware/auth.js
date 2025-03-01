@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+
 function setAssign(req, res, payload) {
-  const token = jwt.sign(payload, "AKASH_GUPTA_@CODEQUOTIENT_@MAIMT_$100", {
+  const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
     expiresIn: "2h",
   });
   res.cookie("token", token, {
@@ -16,22 +17,20 @@ function authentication(req, res, next) {
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ msg: "Access denied" });
   try {
-    const decode = jwt.verify(token, "AKASH_GUPTA_@CODEQUOTIENT_@MAIMT_$100");
+    const decode = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    req.obj = decode;
     next();
   } catch (err) {
     return res.status(500).json({ msg: "internal error", err });
   }
 }
-function getData(req, res) {
-  // const header = req.headers["authorization"];
-  // if (!header) return res.status(401).json({ msg: "Access denied" });
-  // const token = header.split("Bearer")[1]?.trim();
+function isLogin(req, res, next) {
   const token = req.cookies.token;
-
-  if (!token) return res.status(401).json({ msg: "Access denied" });
+  if (!token) return next();
   try {
-    const decode = jwt.verify(token, "AKASH_GUPTA_@CODEQUOTIENT_@MAIMT_$100");
-    return decode;
+    const decode = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    req.obj = decode;
+    return res.status(400).json({msg:"user already login"})
   } catch (err) {
     return res.status(500).json({ msg: "internal error", err });
   }
@@ -43,10 +42,10 @@ function verify(req, res) {
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ msg: "Access denied" });
   try {
-    const decode = jwt.verify(token, "AKASH_GUPTA_@CODEQUOTIENT_@MAIMT_$100");
+    const decode = jwt.verify(token, process.env.JWT_SECRET_KEY);
     return res.status(200).json({ msg: "verify" });
   } catch (err) {
     return res.status(500).json({ msg: "internal error", err });
   }
 }
-module.exports = { setAssign, authentication, getData, verify };
+module.exports = { setAssign, authentication,isLogin, verify };
