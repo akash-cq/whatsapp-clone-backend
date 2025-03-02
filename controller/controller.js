@@ -5,36 +5,44 @@ const bcrypt = require("bcrypt");
 const { setAssign } = require("../middleware/auth");
 async function Registartion(req, res) {
   const { name, email, password } = req.body;
-  if (name.trim() == "" || email.trim() == "" || password.trim() == ""||password.length<=6){
-    return res.status(401).json({msg:"something is wrong in credential please check"})
+  if (
+    name.trim() == "" ||
+    email.trim() == "" ||
+    password.trim() == "" ||
+    password.length <= 6
+  ) {
+    return res
+      .status(401)
+      .json({ msg: "something is wrong in credential please check" });
   }
-    try {
-      const payload = {
-        userName: name.replace(/\s/g, ""),
-        email: email.replace(/\s/g, ""),
-        password: password.replace(/\s/g, ""),
-      };
-      console.log(payload)
-      const isemailExist = await User.findOne({ email: payload.email });
-      if (isemailExist != null)
-        return res.status(401).json({ msg: "user already exist" });
-      const salt = await bcrypt.genSalt(10);
-      const hashP = await bcrypt.hash(payload.password, salt);
+  try {
+    const payload = {
+      userName: name.replace(/\s/g, ""),
+      email: email.replace(/\s/g, ""),
+      password: password.replace(/\s/g, ""),
+    };
+    console.log(payload);
+    const isemailExist = await User.findOne({ email: payload.email });
+    if (isemailExist != null)
+      return res.status(401).json({ msg: "user already exist" });
+    const salt = await bcrypt.genSalt(10);
+    const hashP = await bcrypt.hash(payload.password, salt);
 
-      const user = new User({
-        userName: payload.userName,
-        email: payload.email,
-        password: hashP,
-      });
-      await user.save();
-      return res.status(200).json({ msg: "successfuly registred" });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json({ msg: "internal error", err });
-    }
+    const user = new User({
+      userName: payload.userName,
+      email: payload.email,
+      password: hashP,
+    });
+    await user.save();
+    return res.status(200).json({ msg: "successfuly registred" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: "internal error", err });
+  }
 }
 async function UserLoginhandle(req, res) {
-  if(req.body.email.trim()==""||req.body.password.trim()=="")return res.status(400).json({ msg: "credentilas filed is empty!!!" });
+  if (req.body.email.trim() == "" || req.body.password.trim() == "")
+    return res.status(400).json({ msg: "credentilas filed is empty!!!" });
   const payload = {
     email: req.body.email,
     password: req.body.password,
@@ -48,9 +56,9 @@ async function UserLoginhandle(req, res) {
     }
     const result = await bcrypt.compare(payload.password, userdetail.password);
 
-      if (!result) {
-        return res.status(400).json({ error: "Invalid credentials" });
-      }
+    if (!result) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
 
     const obj = {
       email: payload.email,
@@ -85,10 +93,11 @@ async function ContactsData(req, res) {
       };
 
       const isExist = await exist(userdetail.id, obj._id); // Await here
-      payload.lastMsg = isExist ? isExist.lastMessage : "No messages yet";
+      payload.lastMsg = isExist ? isExist.lastMessage : null;
       payload.time = isExist ? isExist.updatedAt : null;
       payload.senderName = isExist?.senderName;
       payload.timestamp = isExist?.timestamp;
+      payload.isFile = isExist?.isFile;
       arr.push(payload);
     }
 
@@ -145,8 +154,13 @@ async function MsgHandle(req, res) {
     };
     console.log(req.body);
     if (req.body.fileUrl) {
+      IsExist.isFile = true;
+      await IsExist.save();
       console.log("wsdcfvb ");
       payloadForMsg.fileUrl = req.body.fileUrl;
+    }else{
+      IsExist.isFile = false;
+      await IsExist.save();
     }
     const msgModel = await Message.create(payloadForMsg);
     await msgModel.save();

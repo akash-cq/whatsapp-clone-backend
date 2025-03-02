@@ -7,7 +7,8 @@ const ChatSchema = new mongoose.Schema({
   lastMessage: { type: String },
   senderName:{type:String},
   updatedAt: { type: String },
-  timestamp:{type:Date, default:Date.now}
+  timestamp:{type:Date, default:Date.now},
+  isFile:{type:Boolean,default:false}
 });
 
 const Chat = mongoose.model("chat", ChatSchema);
