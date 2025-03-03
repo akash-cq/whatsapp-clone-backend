@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS",],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
@@ -49,10 +49,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("isOnline", ({ receiverId }) => {
+    console.log(receiverId,"52")
     if (users[receiverId]) {
       console.log(users, "isonline");
       socket.emit("online", true);
     } else {
+      console.log(users[receiverId],"57")
     socket.emit("offline", { id: receiverId, status: false });
     }
   });
@@ -66,6 +68,14 @@ io.on("connection", (socket) => {
     }
   });
 
+    socket.on("typing", ({ senderId, isType, receiver })=>{
+      if(users[receiver]){
+        console.log("typing... ")
+        socket.to(users[receiver]).emit("isTyping", { senderId, isType });
+      }else{
+        console.log("offline")
+      }
+    });
   socket.on("disconnect", () => {
     let id = null;
     for (let userId in users) {

@@ -13,7 +13,12 @@ router.get("/user/info/:id", authentication, controller.getInformation);
 router.get("/authentication", verify);
 router.post("/sendMsg", msgLimit,authentication, controller.MsgHandle);
 router.post("/getMsg", authentication, controller.getMsgHandle);
-router.post("/upload/profileDp",authentication,upload.single('dp'), controller.uploadProfileDp);
+router.put(
+  "/upload/profileDp",
+  authentication,
+  upload.single("dp"),
+  controller.uploadProfileDp
+);
 router.post(
   "/upload/msgFile",
   authentication,upload.single("msgFile"),

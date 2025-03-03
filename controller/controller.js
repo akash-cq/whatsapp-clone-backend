@@ -21,7 +21,7 @@ async function Registartion(req, res) {
       email: email.replace(/\s/g, ""),
       password: password.replace(/\s/g, ""),
     };
-    console.log(payload);
+    // console.log(payload);
     const isemailExist = await User.findOne({ email: payload.email });
     if (isemailExist != null)
       return res.status(401).json({ msg: "user already exist" });
@@ -36,7 +36,7 @@ async function Registartion(req, res) {
     await user.save();
     return res.status(200).json({ msg: "successfuly registred" });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     return res.status(500).json({ msg: "internal error", err });
   }
 }
@@ -47,13 +47,14 @@ async function UserLoginhandle(req, res) {
     email: req.body.email,
     password: req.body.password,
   };
-  console.log(payload);
+  // console.log(payload);
   try {
     const userdetail = await User.findOne({ email: payload.email });
-    console.log(userdetail);
+    // console.log(userdetail);
     if (userdetail == null) {
       return res.status(400).json({ msg: "user credentail wrong" });
     }
+    // console.log(userdetail)
     const result = await bcrypt.compare(payload.password, userdetail.password);
 
     if (!result) {
@@ -67,7 +68,7 @@ async function UserLoginhandle(req, res) {
     const token = setAssign(req, res, obj);
     return res.status(200).json({ msg: "user is verified", token });
   } catch (err) {
-    console.log(err);
+    (err);
     return res.status(500).json({ msg: "internal error", err });
   }
 }
@@ -103,7 +104,7 @@ async function ContactsData(req, res) {
 
     return res.status(200).json({ msg: "success", arr });
   } catch (err) {
-    console.log(err);
+    (err);
     return res.status(500).json({ msg: "internal error", err });
   }
 }
@@ -120,7 +121,7 @@ async function PersonalDetail(req, res) {
 }
 async function MsgHandle(req, res) {
   try {
-    console.log("hello world", req.body);
+    ("hello world", req.body);
     const { senderId, receiverId, msg, timestamp, isRead } = req.body;
     const username = await User.findById(senderId);
     const payloadForchat = {
@@ -152,11 +153,11 @@ async function MsgHandle(req, res) {
       senderName: username.userName,
       timestamp: timestamp,
     };
-    console.log(req.body);
+   // // // console.log(req.body);
     if (req.body.fileUrl) {
       IsExist.isFile = true;
       await IsExist.save();
-      console.log("wsdcfvb ");
+      // // console.log("wsdcfvb ");
       payloadForMsg.fileUrl = req.body.fileUrl;
     }else{
       IsExist.isFile = false;
@@ -164,10 +165,10 @@ async function MsgHandle(req, res) {
     }
     const msgModel = await Message.create(payloadForMsg);
     await msgModel.save();
-    // console.log(msgModel);
+    // // // console.log(msgModel);
     return res.status(200).json({ msg: "succesfuly saved", msgModel });
   } catch (err) {
-    console.log(err);
+    // // console.log(err);
     res.status(500).json({ err, msg: "internal error" });
   }
 }
@@ -176,13 +177,13 @@ async function getMsgHandle(req, res) {
     const { receiverId } = req.body;
     const userdetail = req.obj;
     const senderId = userdetail.id;
-    console.log("come");
-    console.log(senderId, receiverId, "wdfghnm");
+    // // console.log("come");
+    // // console.log(senderId, receiverId, "wdfghnm");
     const chatId = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
     });
     let obj = [];
-    console.log(chatId);
+    // // console.log(chatId);
     if (chatId == null) return res.status(404).json({ msg: "not found", obj });
     const Messages = await Message.find({ chatId: chatId?.id });
     if (Messages.length == 0)
@@ -202,7 +203,7 @@ async function getMsgHandle(req, res) {
     });
     return res.status(200).send(obj);
   } catch (err) {
-    console.log(err);
+    // // console.log(err);
     return res.status(500).json({ msg: "internal error" });
   }
 }
@@ -219,11 +220,11 @@ async function getInformation(req, res) {
 async function uploadProfileDp(req, res) {
   try {
     if (req.file == null) {
-      console.log("error in file");
+      // // console.log("error in file");
       return res.status(400).json({ msg: "file not found" });
     }
     const user = req.obj;
-    console.log(req.file);
+    // // console.log(req.file);
     const userDetail = await User.findById(user.id);
     const cleanPath = req.file.path.replace(/\\/g, "/").replace(/\/{2,}/g, "/");
     const fileUrl = `${req.protocol}://${req.get("host")}/${cleanPath}`;
@@ -233,15 +234,15 @@ async function uploadProfileDp(req, res) {
       .status(200)
       .json({ msg: "profile pic uploaded successfully", dp: fileUrl });
   } catch (err) {
-    console.log(err);
+    // // console.log(err);
     return res.status(500).json({ msg: "internal error" });
   }
 }
 async function uploadMsgFile(req, res) {
   try {
-    console.log(req.file);
+    // // console.log(req.file);
     if (req.file == null) {
-      console.log("error in file");
+      // // console.log("error in file");
       return res.status(400).json({ msg: "file not found" });
     }
 
@@ -249,7 +250,7 @@ async function uploadMsgFile(req, res) {
     const fileUrl = `${req.protocol}://${req.get("host")}/${cleanPath}`;
     return res.status(200).json({ msg: "file uploaded successfully", fileUrl });
   } catch (err) {
-    console.log(err);
+    // // console.log(err);
     return res.status(500).json({ msg: "internal error" });
   }
 }
@@ -258,7 +259,7 @@ async function logout(req, res) {
     res.clearCookie("token");
     return res.status(200).json({ msg: "logout successfully" });
   } catch (err) {
-    console.log(err);
+    // // console.log(err);
     return res.status(500).json({ msg: "internal error" });
   }
 }
