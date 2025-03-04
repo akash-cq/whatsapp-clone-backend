@@ -263,6 +263,35 @@ async function logout(req, res) {
     return res.status(500).json({ msg: "internal error" });
   }
 }
+async function changebio(req, res) {
+  try {
+    const userdetail = req.obj;
+    console.log(req.obj)
+    const { bio } = req.body;
+    console.log(req.body)
+    if(!bio)return res.status(403).json({msg:"no value"})
+    if (!userdetail?.id) {
+      return res.status(400).json({ message: "User ID is missing from token" });
+    }
+
+    const updatedUser = await User.findById(userdetail.id)
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    updatedUser.about = bio
+    await updatedUser.save();
+console.log(updatedUser)
+    res.status(200).json({
+      message: "Bio updated successfully",
+      bio: bio,
+    });
+  } catch (error) {
+    console.error("Error updating bio:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 module.exports = {
   Registartion,
   UserLoginhandle,
@@ -274,4 +303,5 @@ module.exports = {
   uploadProfileDp,
   logout,
   uploadMsgFile,
+  changebio,
 };
