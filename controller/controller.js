@@ -77,7 +77,6 @@ async function exist(senderId, receiverId) {
     participants: { $all: [senderId, receiverId] },
   });
 }
-
 async function ContactsData(req, res) {
   try {
     const userdetail = req.obj;
@@ -129,6 +128,8 @@ async function MsgHandle(req, res) {
       lastMessage: msg,
       updatedAt: timestamp,
       senderName: username.userName,
+      senderId:senderId,
+      isRead:false
     };
 
     let IsExist = await Chat.findOne({
@@ -139,11 +140,14 @@ async function MsgHandle(req, res) {
       IsExist.lastMessage = msg;
       IsExist.senderName = username.userName;
       IsExist.updatedAt = timestamp;
+      IsExist.senderId = senderId;
+      IsExist.isRead = false;
       await IsExist.save();
     } else {
       IsExist = await Chat.create(payloadForchat);
       await IsExist.save();
     }
+    console.log(IsExist)
     const payloadForMsg = {
       chatId: IsExist._id,
       senderId: senderId,
@@ -198,6 +202,7 @@ async function getMsgHandle(req, res) {
         timestamp: msgs.timestamp,
         msgId: msgs._id,
         fileUrl: msgs.fileUrl,
+        isRead:msgs.isRead
       };
       obj.push(payloadSend);
     });

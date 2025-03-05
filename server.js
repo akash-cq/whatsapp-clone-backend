@@ -6,7 +6,8 @@ const cookieParser = require("cookie-parser");
 const socket = require("socket.io");
 const router = require("./routes/routes");
 require("dotenv").config();
-const socketIo = require("./controller/socket")
+const socketIo = require("./controller/socket");
+const { authentication } = require("./middleware/auth");
 app.use(cookieParser()); // Enables cookie parsing
 app.use(express.json());
 // const static = require("./middleware/static");
