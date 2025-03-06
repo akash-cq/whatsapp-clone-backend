@@ -72,7 +72,11 @@ function Allread(socket, io) {
     }
   });
 }
-
+function signup(socket,io){
+  socket.on("newuser",()=>{
+    io.emit("newuser")
+  });
+}
 module.exports = {
   handleUserJoin,
   typingHandle,
@@ -80,4 +84,5 @@ module.exports = {
   handleUserOnline,
   disconnetionUser,
   Allread,
+  signup,
 };

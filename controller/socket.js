@@ -5,6 +5,7 @@ const {
   handleUserOnline,
   disconnetionUser,
   Allread,
+  signup,
 } = require("./socketController");
 
 const socket = (io) => {
@@ -25,6 +26,8 @@ const socket = (io) => {
 
     socket1.removeAllListeners("AllRead");
     Allread(socket1,io)
+    socket1.removeAllListeners("newuser");
+    signup(socket1,io)
     socket1.removeAllListeners("disconnect");
     disconnetionUser(socket1);
 

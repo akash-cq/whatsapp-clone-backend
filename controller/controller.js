@@ -98,7 +98,8 @@ async function ContactsData(req, res) {
       payload.senderName = isExist?.senderName;
       payload.timestamp = isExist?.timestamp;
       payload.isFile = isExist?.isFile;
-      payload.isRead = isExist?.isRead
+      payload.isRead = isExist?.isRead;
+      payload.senderId = isExist?.senderId;
       arr.push(payload);
     }
 
