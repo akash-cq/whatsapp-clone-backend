@@ -4,9 +4,12 @@ async function GroupCreation(req, res) {
     const members = req.body.members;
     const payload = {
       adminid: req.body.admin || req.obj.id,
-      name: req.body.name || req.obj.name,
+      name: req.body.name.trim()
     };
-    console.log(members)
+    console.log(payload);
+    const isExistGroup = await Group.find({ name: payload.name });
+    console.log(isExistGroup)
+    if(isExistGroup.length>0)return res.status(400).json({msg:'already exist'})
     const group = new Group({
       participants: members,
       name: payload.name,
@@ -19,4 +22,17 @@ async function GroupCreation(req, res) {
     res.status(500).json({ msg: error });
   }
 }
-module.exports = { GroupCreation };
+async function getGroups(req, res) {
+  try {
+    console.log(req.obj, "sdcfv");
+    const { id } = req.obj;
+    const groups = await Group.find({ "participants.userid": id });
+    console.log(groups);
+
+    return res.status(200).json({ msg: "success" ,groups});
+  } catch (error) {
+    console.log(err);
+    return res.status(500).json({ msg: "internal error" });
+  }
+}
+module.exports = { GroupCreation, getGroups };

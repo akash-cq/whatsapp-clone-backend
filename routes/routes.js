@@ -31,4 +31,5 @@ router.put("/user/bio", authentication, controller.changebio);
 // router.get("/download/:file", controller.downloadFile);
 router.post("/group/groupcreate", authentication, GroupController.GroupCreation);
 router.get("/logout", authentication, controller.logout);
+router.get("/group/getgroups", authentication, GroupController.getGroups);
 module.exports = router;
