@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { authentication, isLogin, verify } = require("../middleware/auth");
 const controller = require("../controller/controller");
+const GroupController = require("../controller/GroupController");
+
 const { loginLimiter, msgLimit } = require("../middleware/limit");
 const upload = require("../middleware/multer");
 
@@ -27,5 +29,6 @@ router.post(
 );
 router.put("/user/bio", authentication, controller.changebio);
 // router.get("/download/:file", controller.downloadFile);
+router.post("/group/groupcreate", authentication, GroupController.GroupCreation);
 router.get("/logout", authentication, controller.logout);
 module.exports = router;
