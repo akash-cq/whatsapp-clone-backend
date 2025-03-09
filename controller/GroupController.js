@@ -1,4 +1,6 @@
+const { default: mongoose } = require("mongoose");
 const Group = require("../model/Group");
+const GroupMsg = require("../model/GroupMsg");
 async function GroupCreation(req, res) {
   try {
     const members = req.body.members;
@@ -8,7 +10,6 @@ async function GroupCreation(req, res) {
     };
     console.log(payload);
     const isExistGroup = await Group.find({ name: payload.name });
-    console.log(isExistGroup)
     if(isExistGroup.length>0)return res.status(400).json({msg:'already exist'})
     const group = new Group({
       participants: members,
@@ -27,7 +28,6 @@ async function getGroups(req, res) {
     console.log(req.obj, "sdcfv");
     const { id } = req.obj;
     const groups = await Group.find({ "participants.userid": id });
-    console.log(groups);
 
     return res.status(200).json({ msg: "success" ,groups});
   } catch (error) {
@@ -35,4 +35,58 @@ async function getGroups(req, res) {
     return res.status(500).json({ msg: "internal error" });
   }
 }
-module.exports = { GroupCreation, getGroups };
+async function GroupMsgHandle(req,res) {
+
+  try{
+
+    const {GroupId , msg,senderName,fileurl,senderId,timestamp } = req.body;
+    const payload = {
+      GroupId: GroupId,
+      msg: msg,
+      senderName: senderName,
+      fileurl: fileurl,
+      senderId: senderId,
+      timestamp:timestamp,
+    };
+    console.log(payload)
+    const grp = await Group.findByIdAndUpdate(GroupId, {
+      $set: {
+        senderId: senderId,
+        updatedAt: timestamp,
+        lastMessage:msg,
+        senderName:senderName,
+      },
+    },
+    {new:true},
+  );
+  if(!grp)return res.status(404).json({ msg: "404 group not found" });
+  const msgs = new GroupMsg(payload);
+  await msgs.save()
+  return  res.status(200).json({ msg: "success" });
+
+  }catch(err){
+    console.log(err)
+    return res.status(500).json({msg:"internal error"})
+  }
+  
+}
+async function getGroupMsg(req,res) {
+  try {
+    
+    const { receiverId } = req.body;
+    console.log(receiverId)
+    if (!mongoose.Types.ObjectId.isValid(receiverId)) {
+      return res.status(400).json({ msg: "Invalid Receiver ID format" });
+    }
+
+    const msgs = await GroupMsg.find({ GroupId: receiverId });
+    if(msgs.length<=0)return res.status(404).json({msg:"404 no messages found"});
+    return res.status(200).json(msgs); 
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({msg:"internal error"});
+  }
+  
+}
+module.exports = { GroupCreation, getGroups, GroupMsgHandle, getGroupMsg };

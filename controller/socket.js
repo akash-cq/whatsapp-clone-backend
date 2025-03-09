@@ -1,36 +1,83 @@
-const {
-  handleUserJoin,
-  typingHandle,
-  handleMsg,
-  handleUserOnline,
-  disconnetionUser,
-  Allread,
-  signup,
-} = require("./socketController");
+let users = {};
+let Chat = require("../model/chat");
+let Messages = require("../model/message");
 
 const socket = (io) => {
-  io.on("connection", (socket1) => {
-    console.log("User connected:", socket1.id);
+  io.on("connection", (socket) => {
+    console.log("User connected:", socket.id);
 
-    socket1.removeAllListeners("join"); // Ensure event is not duplicated
-    handleUserJoin(socket1);
+    socket.on("join", (userId) => {
+      if (!users[userId]) {
+        users[userId] = socket.id;
+      } else {
+        console.log("User already connected");
+      }
+      console.log(users, "join");
+    });
 
-    socket1.removeAllListeners("typing");
-    typingHandle(socket1);
+    socket.on("isOnline", ({ receiverId }) => {
+      if (users[receiverId]) {
+        socket.emit("online", true);
+      } else {
+        socket.emit("offline", { id: receiverId, status: false });
+      }
+    });
 
-    socket1.removeAllListeners("sendMsg");
-    handleMsg(socket1, io);
+    socket.on("sendMsg", ({ receiverId, payload }) => {
+      if (users[receiverId]) {
+        io.to(users[receiverId]).emit("recieveMsg", payload);
+      } else {
+        console.log("User is offline");
+      }
+    });
 
-    socket1.removeAllListeners("isOnline");
-    handleUserOnline(socket1);
+    socket.on("typing", ({ senderId, isType, receiver }) => {
+      if (users[receiver]) {
+        socket.to(users[receiver]).emit("isTyping", { senderId, isType });
+      } else {
+        console.log("User is offline");
+      }
+    });
 
-    socket1.removeAllListeners("AllRead");
-    Allread(socket1,io)
-    socket1.removeAllListeners("newuser");
-    signup(socket1,io)
-    socket1.removeAllListeners("disconnect");
-    disconnetionUser(socket1);
+    socket.on("disconnect", () => {
+      let id = null;
+      for (let userId in users) {
+        if (users[userId] === socket.id) {
+          id = userId;
+          delete users[userId];
+          break;
+        }
+      }
+      console.log("User disconnected");
+      console.log(id, "user disconnected", users);
+      socket.broadcast.emit("offline", { id: id, status: false });
+    });
 
+    socket.on("AllRead", async ({ writer, reader }) => {
+      let IsExist = await Chat.findOne(
+        { participants: { $all: [writer, reader] } },
+        { _id: 1, senderId: 1, isRead: 1 }
+      );
+      if (IsExist == null) return;
+      if (!IsExist.isRead && reader != IsExist.senderId) {
+        IsExist.isRead = true;
+        await IsExist.save();
+        await Messages.updateMany({ chatId: IsExist._id }, { isRead: true });
+        io.to(users[writer]).emit("DoneReading", { reader });
+      }
+    });
+
+    socket.on("newuser", () => {
+      io.emit("newuser");
+    });
+    socket.on("joinGrp", ({ id }) => {
+      console.log(id, "join grp");
+      socket.join(id);
+      io.to(id).emit("someone");
+    });
+    socket.on("msgInGrp", ({ receiver, payload })=>{
+      socket.to(receiver).emit('sendMsgIngrp',payload)
+    })
   });
 };
 

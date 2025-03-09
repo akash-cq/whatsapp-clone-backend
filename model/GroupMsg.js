@@ -15,5 +15,7 @@ const GroupMessageSchema = new mongoose.Schema({
   timestamp: { type: String },
 });
 
-const GroupMsg = mongoose.model("message", GroupMessageSchema);
+const GroupMsg =
+  mongoose.models.grpmessage ||
+  mongoose.model("grpmessage", GroupMessageSchema);
 module.exports = GroupMsg;

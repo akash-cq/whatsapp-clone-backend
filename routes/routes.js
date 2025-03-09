@@ -32,4 +32,6 @@ router.put("/user/bio", authentication, controller.changebio);
 router.post("/group/groupcreate", authentication, GroupController.GroupCreation);
 router.get("/logout", authentication, controller.logout);
 router.get("/group/getgroups", authentication, GroupController.getGroups);
+router.post("/group/sendMsgGroup",authentication, GroupController.GroupMsgHandle);
+router.post("/group/getgroupmsg", authentication, GroupController.getGroupMsg);
 module.exports = router;
