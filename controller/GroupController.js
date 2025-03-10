@@ -25,7 +25,7 @@ async function GroupCreation(req, res) {
 }
 async function getGroups(req, res) {
   try {
-    console.log(req.obj, "sdcfv");
+    // console.log(req.obj, "sdcfv");
     const { id } = req.obj;
     const groups = await Group.find({ "participants.userid": id });
 
@@ -48,7 +48,6 @@ async function GroupMsgHandle(req,res) {
       senderId: senderId,
       timestamp:timestamp,
     };
-    console.log(payload)
     const grp = await Group.findByIdAndUpdate(GroupId, {
       $set: {
         senderId: senderId,
@@ -74,7 +73,6 @@ async function getGroupMsg(req,res) {
   try {
     
     const { receiverId } = req.body;
-    console.log(receiverId)
     if (!mongoose.Types.ObjectId.isValid(receiverId)) {
       return res.status(400).json({ msg: "Invalid Receiver ID format" });
     }

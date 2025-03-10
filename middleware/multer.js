@@ -4,7 +4,6 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    console.log(file);
     if (!file)  return cb(false, false);
     if (file.fieldname == "dp") cb(null, "./uploads/profileDp");
     else if (file.fieldname == "msgFile") {

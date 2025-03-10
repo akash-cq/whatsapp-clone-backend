@@ -275,7 +275,7 @@ async function changebio(req, res) {
     const userdetail = req.obj;
     console.log(req.obj)
     const { bio } = req.body;
-    console.log(req.body)
+    // console.log(req.body)
     if(!bio)return res.status(403).json({msg:"no value"})
     if (!userdetail?.id) {
       return res.status(400).json({ message: "User ID is missing from token" });
@@ -288,7 +288,7 @@ async function changebio(req, res) {
     }
     updatedUser.about = bio
     await updatedUser.save();
-console.log(updatedUser)
+// console.log(updatedUser)
     res.status(200).json({
       message: "Bio updated successfully",
       bio: bio,

@@ -4,7 +4,6 @@ let Messages = require("../model/message");
 
 const socket = (io) => {
   io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
 
     socket.on("join", (userId) => {
       if (!users[userId]) {
@@ -12,7 +11,6 @@ const socket = (io) => {
       } else {
         console.log("User already connected");
       }
-      console.log(users, "join");
     });
 
     socket.on("isOnline", ({ receiverId }) => {
@@ -48,8 +46,6 @@ const socket = (io) => {
           break;
         }
       }
-      console.log("User disconnected");
-      console.log(id, "user disconnected", users);
       socket.broadcast.emit("offline", { id: id, status: false });
     });
 
@@ -71,7 +67,6 @@ const socket = (io) => {
       io.emit("newuser");
     });
     socket.on("joinGrp", ({ id }) => {
-      console.log(id, "join grp");
       socket.join(id);
       io.to(id).emit("someone");
     });
