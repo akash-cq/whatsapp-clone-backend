@@ -25,8 +25,8 @@ app.use(
 app.use("/", router);
 
 app.use("/uploads", express.static("uploads")); 
-console.log("server listen on port 3000");
 const server = app.listen(process.env.PORT, () => {
+  console.log("server listen on port 3000");
 });
 
 const io = socket(server, {

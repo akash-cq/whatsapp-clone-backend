@@ -73,6 +73,10 @@ const socket = (io) => {
     socket.on("msgInGrp", ({ receiver, payload })=>{
       socket.to(receiver).emit('sendMsgIngrp',payload)
     })
+     socket.on("logout", ({userid}) => {
+       let id = users[userid];
+       socket.broadcast.emit("offline", { id: id, status: false });
+     });
   });
 };
 
