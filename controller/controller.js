@@ -32,6 +32,7 @@ async function Registartion(req, res) {
       userName: payload.userName,
       email: payload.email,
       password: hashP,
+      dp: "https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg",
     });
     await user.save();
     return res.status(200).json({ msg: "successfuly registred" });

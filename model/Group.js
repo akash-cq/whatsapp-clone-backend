@@ -1,20 +1,25 @@
 const mongoose = require("mongoose");
 
 const GroupSchema = new mongoose.Schema({
-  participants: [{
-    userid:{ type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
-    MemberName:{type:String,required:true},
-    dp:{type:String,default:null},
-  }
+  participants: [
+    {
+      userid: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+        required: true,
+      },
+      MemberName: { type: String, required: true },
+      dp: { type: String, default: null },
+    },
   ],
-  name:{
-    type:String,
-    required:true,
-    unique:true
+  name: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  lastMessage: { type: String ,default:""},
-  senderName: { type: String ,default:""},
-  updatedAt: { type: String ,default:""},
+  lastMessage: { type: String, default: "" },
+  senderName: { type: String, default: "" },
+  updatedAt: { type: String, default: "" },
   adminid: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
@@ -25,6 +30,11 @@ const GroupSchema = new mongoose.Schema({
   senderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
+  },
+  dp: {
+    type: String,
+    default:
+      "https://www.shutterstock.com/image-vector/business-man-icon-team-work-260nw-404838214.jpg",
   },
 });
 
