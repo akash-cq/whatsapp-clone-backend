@@ -3,6 +3,7 @@ const router = express.Router();
 const { authentication, isLogin, verify } = require("../middleware/auth");
 const controller = require("../controller/controller");
 const GroupController = require("../controller/GroupController");
+const otp = require("../controller/otp.js");
 
 const { loginLimiter, msgLimit } = require("../middleware/limit");
 const upload = require("../middleware/multer");
@@ -34,4 +35,8 @@ router.get("/logout", authentication, controller.logout);
 router.get("/group/getgroups", authentication, GroupController.getGroups);
 router.post("/group/sendMsgGroup",authentication, GroupController.GroupMsgHandle);
 router.post("/group/getgroupmsg", authentication, GroupController.getGroupMsg);
+router.post('/forget/email',otp.otpGen)
+router.post("/forget/otp/verify", authentication,otp.otpverify);
+router.post("/forget/password/reset", authentication, otp.Passwordreset);
+
 module.exports = router;

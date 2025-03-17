@@ -81,10 +81,9 @@ async function exist(senderId, receiverId) {
 async function ContactsData(req, res) {
   try {
     const userdetail = req.obj;
-
+    console.log(userdetail)
     const users = await User.find({ _id: { $ne: userdetail.id } });
-
-    let arr = [];
+      let arr = [];
 
     for (const obj of users) {
       const payload = {

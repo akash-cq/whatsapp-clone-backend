@@ -64,13 +64,13 @@ function Allread(socket, io) {
     console.log(IsExist, "sdcfvb");
     if (IsExist == null) return;
     if (!IsExist.isRead && reader != IsExist.senderId) {
-      console.log("hello 65");
       IsExist.isRead = true;
       await IsExist.save();
       await Messages.updateMany({ chatId: IsExist._id }, { isRead: true });
       io.to(users[writer]).emit("DoneReading", { reader });
     }
   });
+  
 }
 function signup(socket,io){
   socket.on("newuser",()=>{

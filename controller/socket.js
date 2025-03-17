@@ -4,7 +4,6 @@ let Messages = require("../model/message");
 
 const socket = (io) => {
   io.on("connection", (socket) => {
-
     socket.on("join", (userId) => {
       if (!users[userId]) {
         users[userId] = socket.id;
@@ -70,13 +69,14 @@ const socket = (io) => {
       socket.join(id);
       io.to(id).emit("someone");
     });
-    socket.on("msgInGrp", ({ receiver, payload })=>{
-      socket.to(receiver).emit('sendMsgIngrp',payload)
-    })
-     socket.on("logout", ({userid}) => {
-       let id = users[userid];
-       socket.broadcast.emit("offline", { id: id, status: false });
-     });
+    socket.on("msgInGrp", ({ receiver, payload }) => {
+      socket.to(receiver).emit("sendMsgIngrp", payload);
+    });
+    socket.on("logout", ({ userid }) => {
+      delete users[userid];
+
+      socket.broadcast.emit("offline", { id: userid, status: false });
+    });
   });
 };
 
