@@ -36,7 +36,7 @@ router.get("/group/getgroups", authentication, GroupController.getGroups);
 router.post("/group/sendMsgGroup",authentication, GroupController.GroupMsgHandle);
 router.post("/group/getgroupmsg", authentication, GroupController.getGroupMsg);
 router.post('/forget/email',otp.otpGen)
-router.post("/forget/otp/verify", authentication,otp.otpverify);
-router.post("/forget/password/reset", authentication, otp.Passwordreset);
+router.post("/forget/otp/verify/", authentication,otp.otpverify);
+router.post("/forget/password/reset/:id", otp.Passwordreset);
 
 module.exports = router;

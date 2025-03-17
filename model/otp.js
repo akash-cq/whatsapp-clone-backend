@@ -14,6 +14,9 @@ const OTP = new mongoose.Schema({
     default: () => new Date(Date.now() + 120000), 
     expires: 120, 
   },
+  userid:{
+   type:String
+  }
 });
 
 const otp = mongoose.model("OTP", OTP);
