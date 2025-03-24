@@ -1,8 +1,14 @@
 const jwt = require("jsonwebtoken");
+const expiresInMs = 2 * 60 * 60 * 1000; // 2 hours
 
+const map =new Map()
 function setAssign(req, res, payload) {
   const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
     expiresIn: "2h",
+  });
+  map.set(payload.email, {
+    val: token,
+    expiry: Date.now() + expiresInMs,
   });
   res.cookie("token", token, {
     httpOnly: true,
@@ -25,15 +31,20 @@ function authentication(req, res, next) {
   }
 }
 function isLogin(req, res, next) {
-  const token = req.cookies.token;
-  if (!token) return next();
-  try {
-    const decode = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.obj = decode;
-    return res.status(400).json({ msg: "user already login" });
-  } catch (err) {
-    return res.status(500).json({ msg: "internal error", err });
-  }
+    try {
+      const payload = {
+        email: req.body.email,
+        password: req.body.password,
+      };
+      const islog = map.get(payload.email);
+      console.log(islog);
+      if (!islog) return next();
+
+      return res.status(400).json({ msg: "user already login" });
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ msg: "internal error", err });
+    }
 }
 
 function verify(req, res) {
@@ -51,4 +62,22 @@ function verify(req, res) {
     return res.status(500).json({ msg: "internal error", err });
   }
 }
-module.exports = { setAssign, authentication, isLogin, verify };
+function logout(req,res,next){
+    try{
+
+        map.delete(req?.obj?.email)
+        next();
+    }catch(err){
+      return res.status(500).json({ msg: "internal error", err });
+    }
+}
+setInterval(() => {
+    const now = Date.now();
+    for (const [email, tokenData] of map) {
+        if (tokenData.expiry < now) {
+            userTokens.delete(email);
+            console.log(`Token for user ${userId} expired and removed.`);
+        }
+    }
+},  10000);
+module.exports = { setAssign, authentication, isLogin, verify, logout };

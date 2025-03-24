@@ -42,6 +42,8 @@ async function Registartion(req, res) {
   }
 }
 async function UserLoginhandle(req, res) {
+  console.log(req.headers["user-agent"]);
+
   if (req.body.email.trim() == "" || req.body.password.trim() == "")
     return res.status(400).json({ msg: "credentilas filed is empty!!!" });
   const payload = {
@@ -69,7 +71,7 @@ async function UserLoginhandle(req, res) {
     const token = setAssign(req, res, obj);
     return res.status(200).json({ msg: "user is verified", token });
   } catch (err) {
-    (err);
+    console.log(err)
     return res.status(500).json({ msg: "internal error", err });
   }
 }
@@ -81,9 +83,9 @@ async function exist(senderId, receiverId) {
 async function ContactsData(req, res) {
   try {
     const userdetail = req.obj;
-    console.log(userdetail)
+    console.log(userdetail);
     const users = await User.find({ _id: { $ne: userdetail.id } });
-      let arr = [];
+    let arr = [];
 
     for (const obj of users) {
       const payload = {
@@ -105,7 +107,7 @@ async function ContactsData(req, res) {
 
     return res.status(200).json({ msg: "success", arr });
   } catch (err) {
-    (err);
+    err;
     return res.status(500).json({ msg: "internal error", err });
   }
 }
@@ -122,7 +124,7 @@ async function PersonalDetail(req, res) {
 }
 async function MsgHandle(req, res) {
   try {
-    ("hello world", req.body);
+    "hello world", req.body;
     const { senderId, receiverId, msg, timestamp, isRead } = req.body;
     const username = await User.findById(senderId);
     const payloadForchat = {
@@ -130,8 +132,8 @@ async function MsgHandle(req, res) {
       lastMessage: msg,
       updatedAt: timestamp,
       senderName: username.userName,
-      senderId:senderId,
-      isRead:false
+      senderId: senderId,
+      isRead: false,
     };
 
     let IsExist = await Chat.findOne({
@@ -149,7 +151,7 @@ async function MsgHandle(req, res) {
       IsExist = await Chat.create(payloadForchat);
       await IsExist.save();
     }
-    console.log(IsExist)
+    console.log(IsExist);
     const payloadForMsg = {
       chatId: IsExist._id,
       senderId: senderId,
@@ -159,13 +161,13 @@ async function MsgHandle(req, res) {
       senderName: username.userName,
       timestamp: timestamp,
     };
-   // // // console.log(req.body);
+    // // // console.log(req.body);
     if (req.body.fileUrl) {
       IsExist.isFile = true;
       await IsExist.save();
       // // console.log("wsdcfvb ");
       payloadForMsg.fileUrl = req.body.fileUrl;
-    }else{
+    } else {
       IsExist.isFile = false;
       await IsExist.save();
     }
@@ -204,7 +206,7 @@ async function getMsgHandle(req, res) {
         timestamp: msgs.timestamp,
         msgId: msgs._id,
         fileUrl: msgs.fileUrl,
-        isRead:msgs.isRead
+        isRead: msgs.isRead,
       };
       obj.push(payloadSend);
     });
@@ -273,22 +275,22 @@ async function logout(req, res) {
 async function changebio(req, res) {
   try {
     const userdetail = req.obj;
-    console.log(req.obj)
+    console.log(req.obj);
     const { bio } = req.body;
     // console.log(req.body)
-    if(!bio)return res.status(403).json({msg:"no value"})
+    if (!bio) return res.status(403).json({ msg: "no value" });
     if (!userdetail?.id) {
       return res.status(400).json({ message: "User ID is missing from token" });
     }
 
-    const updatedUser = await User.findById(userdetail.id)
+    const updatedUser = await User.findById(userdetail.id);
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    updatedUser.about = bio
+    updatedUser.about = bio;
     await updatedUser.save();
-// console.log(updatedUser)
+    // console.log(updatedUser)
     res.status(200).json({
       message: "Bio updated successfully",
       bio: bio,

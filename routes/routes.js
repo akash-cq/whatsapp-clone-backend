@@ -8,7 +8,7 @@ const otp = require("../controller/otp.js");
 const { loginLimiter, msgLimit } = require("../middleware/limit");
 const upload = require("../middleware/multer");
 
-router.post("/signup", isLogin, controller.Registartion);
+router.post("/signup", controller.Registartion);
 router.post("/login", loginLimiter, isLogin, controller.UserLoginhandle);
 router.get("/getContacts", authentication, controller.ContactsData);
 router.get("/getPersonalDetail", authentication, controller.PersonalDetail);
